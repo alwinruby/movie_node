@@ -70,3 +70,26 @@ app.get('/pending', function(req, res){
 
 // Launch our API Server and have it listen on port 8080.
 app.listen(8080);
+
+// dependencies omitted
+
+// We’ll create a middleware function to validate the access token when our API is called
+// Note that the audience field is the identifier you gave to your API.
+var jwtCheck = jwt({
+  secret: rsaValidation(),
+  algorithms: ['RS256'],
+  issuer: "https://movielist-as.eu.auth0.com",
+  audience: 'https://movieanalyst.com'
+});
+
+// Enable the use of the jwtCheck middleware in all of our routes
+app.use(jwtCheck);
+
+// If we do not get the correct credentials, we’ll return an appropriate message
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({message:'Missing or invalid token'});
+  }
+});
+
+// routes omitted
