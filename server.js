@@ -73,6 +73,66 @@ app.listen(8080);
 
 // dependencies omitted
 
+// existing jwtCheck middleware
+
+var guard = function(req, res, next){
+  // we’ll use a case switch statement on the route requested
+  switch(req.path){
+    // if the request is for movie reviews we’ll check to see if the token has general scope
+    case '/movies' : {
+      var permissions = ['general'];
+      for(var i = 0; i < permissions.length; i++){
+        if(req.user.scope.includes(permissions[i])){
+          next();
+        } else {
+          res.send(403, {message:'Forbidden'});
+        }
+      }
+      break;
+    }
+    // Same for the reviewers
+    case '/reviewers': {
+      var permissions = ['general'];
+      for(var i = 0; i < permissions.length; i++){
+        if(req.user.scope.includes(permissions[i])){
+          next();
+        } else {
+          res.send(403, {message:'Forbidden'});
+        }
+      }
+      break;
+    }
+    // Same for publications
+    case '/publications': {
+      var permissions = ['general'];
+      for(var i = 0; i < permissions.length; i++){
+        if(req.user.scope.includes(permissions[i])){
+          next();
+        } else {
+          res.send(403, {message:'Forbidden'});
+        }
+      }
+      break;
+    }
+    // For the pending route, we’ll check to make sure the token has the scope of admin before returning the results.
+    case '/pending': {
+      var permissions = ['admin'];
+      console.log(req.user.scope);
+      for(var i = 0; i < permissions.length; i++){
+        if(req.user.scope.includes(permissions[i])){
+          next();
+        } else {
+          res.send(403, {message:'Forbidden'});
+        }
+      }
+      break;
+    }
+  }
+
+  // existing app.use middleware
+
+app.use(guard);
+
 // We’ll create a middleware function to validate the access token when our API is called
 // Note that the audience field is the identifier you gave to your API.
 var jwtCheck = jwt({
@@ -83,7 +143,7 @@ var jwtCheck = jwt({
 });
 
 // Enable the use of the jwtCheck middleware in all of our routes
-app.use(jwtCheck);
+//app.use(jwtCheck);
 
 // If we do not get the correct credentials, we’ll return an appropriate message
 app.use(function (err, req, res, next) {
@@ -91,5 +151,7 @@ app.use(function (err, req, res, next) {
     res.status(401).json({message:'Missing or invalid token'});
   }
 });
+
+
 
 // routes omitted
